@@ -1,22 +1,33 @@
 from sklearn import datasets
 from lab1 import Lab1
 
-data = datasets.load_breast_cancer()
 
-lab = Lab1(data)
+def task2(lab):
 
-lab.k_neighbors(lab.X, lab.Y, 7)
+    #Обучить классификатор на основе метода k ближайших соседей при фиксированном (произвольном) k.
+    #Оценить качество классификации на тренировочной/тестовой выборке.
+    lab.k_neighbors(lab.X, lab.Y, 7, Print=True)
 
-lab.k_neighbors_n_fold(lab.X, lab.Y, 7, 10)
+    #Сделать 10-fold кросс-валидацию при фиксированном k
+    lab.k_neighbors_n_fold(lab.X, lab.Y, 7, 10, Print=True)
 
-def task2():
     ns = [2, 5, 8, 10]
-    ks = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+    ks = [i for i in range(1, 10)]
+
+    #Построить графики зависимости точности на тренировочном/тестовом наборе от числа k (с дисперсией)
     nfold_accuracies = [[lab.k_neighbors_n_fold(lab.X, lab.Y, k, n) for k in ks] for n in ns]
     for nfold in range(len(nfold_accuracies)):
-        accuracies = nfold_accuracies[nfold]
+        accuracies = [i[0] for i in nfold_accuracies[nfold]]
+        errors = [i[1] for i in nfold_accuracies[nfold]]
         n = ns[nfold]
-        lab.k_neighbors_plot(ks, accuracies, n)
+        best_accuracy = max(accuracies)
+        print('Best_accuracy : {} on k_neighbors : {}'.format(best_accuracy, accuracies.index(best_accuracy)))
+        lab.k_neighbors_plot(ks, accuracies, errors, n)
 
-task2()
+
+if __name__ == '__main__':
+    data = datasets.load_breast_cancer()
+    lab = Lab1(data)
+
+    task2(lab)
 

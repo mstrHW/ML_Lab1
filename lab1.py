@@ -30,12 +30,27 @@ class Lab1(object):
         return X_reduced
 
     def get_covariance(self, X):
-        X_cov = np.cov(X.T)
-        return X_cov
+        return np.cov(X.T)
 
     def get_orto(self, X):
-        result = X.T.dot(X)
-        return result
+        return X.T.dot(X)
+
+    def plot_EV(self, eigvals, title):
+
+        fig, ax = plt.subplots()
+        ax.set_title(title)
+        ax.set_xlabel('Number of eigenvalue')
+        ax.set_ylabel('Explained Variance')
+        ax.grid(True)
+
+        evr = np.array(eigvals / sum(eigvals))
+        ax.plot(np.cumsum(evr), c='k')
+
+        ax.axhline(0.9, color='red', label='90% EV')
+        ax.axhline(0.95, color='blue', label='95% EV')
+        ax.axhline(0.99, color='green', label='99% EV')
+
+        plt.show()
 
     def plot_pca(self, X_reduced):
         fig = plt.figure(1, figsize=(8, 6))
@@ -51,25 +66,31 @@ class Lab1(object):
         ax.w_zaxis.set_ticklabels([])
         plt.show()
 
-    def k_neighbors(self, X, Y, k):
+    def k_neighbors(self, X, Y, k, Print=False):
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1)
         neigh = KNeighborsClassifier(n_neighbors=k)
         neigh.fit(X_train, Y_train)
-        print('Train_set : n_neighbors : {}, accuracy : {:.8f}'.format(k, neigh.score(X_train, Y_train)))
-        print('Test_set : n_neighbors : {}, accuracy : {:.8f}'.format(k, neigh.score(X_test, Y_test)))
+        if Print:
+            print('Train_set : n_neighbors : {}, accuracy : {:.8f}'.format(k, neigh.score(X_train, Y_train)))
+            print('Test_set : n_neighbors : {}, accuracy : {:.8f}'.format(k, neigh.score(X_test, Y_test)))
 
-    def k_neighbors_n_fold(self,  X, Y, k, cross_val_n=10, Print=False):
+    def k_neighbors_n_fold(self, X, Y, k, cross_val_n=10, Print=False):
         neigh = KNeighborsClassifier(n_neighbors=k)
         scores = cross_val_score(neigh, X, Y, cv=cross_val_n)
         mean = scores.mean()
+        std = scores.std()
         if Print:
-            print('Cross_val : {}'.format(mean))
-        return mean
+            print('Cross_val : {} +- {}'.format(mean, std))
+        return mean, std
 
-    def k_neighbors_plot(self, ks, accuracy, n):
-        plt.scatter(ks, accuracy)
+    def k_neighbors_plot(self, ks, accuracies, errors, n):
 
+        #plt.scatter(ks, accuracies)
+
+        #plt.title(title)
         plt.xlabel('K_neighbors, n_fold : {}'.format(n))
         plt.ylabel('Accuracy')
+
+        plt.errorbar(ks, accuracies, yerr=errors, ecolor='red')
 
         plt.show()
